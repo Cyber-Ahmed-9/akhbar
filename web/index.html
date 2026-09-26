@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#15181B">
+<title>رصد الأخبار</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#15181B;--bar:#1B1E22;--card:#22262B;--card2:#2A2F35;--line:#3A3F45;--tx:#E4E1DC;--mut:#A9A49C;
+--pri:#8FB3DE;--sec:#C9A36B;--err:#E08A7E;--ok:#4CAF7A;
+--f:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font:15px/1.6 var(--f);padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+button{font:inherit;cursor:pointer}a{color:inherit}
+header{position:sticky;top:0;z-index:20;background:var(--bar);padding:calc(8px + env(safe-area-inset-top)) 14px 0;border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:8px}
+.top h1{font-size:19px;margin:0;font-weight:700}
+.sub{font-size:12px;color:var(--mut)}
+.grow{flex:1}
+.ib{background:none;border:0;color:var(--mut);width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.ib:hover,.ib:focus-visible{background:var(--card);color:var(--tx);outline:none}
+.ib.on{color:var(--pri)}
+.ib svg{width:22px;height:22px}
+.prog{height:3px;background:transparent;overflow:hidden;margin:6px -14px 0}
+.prog.on{background:linear-gradient(90deg,transparent,var(--pri),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:sl 1.1s linear infinite}
+@keyframes sl{from{background-position:-40% 0}to{background-position:140% 0}}
+@media (prefers-reduced-motion:reduce){.prog.on{animation:none;background:var(--pri)}}
+#search{display:none;width:100%;margin:8px 0 0;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font:inherit}
+#search.show{display:block}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin:6px -14px 0;padding:0 8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;background:none;border:0;color:var(--mut);padding:9px 12px;border-bottom:3px solid transparent;white-space:nowrap}
+.tab.act{color:var(--c,var(--pri));border-color:var(--c,var(--pri));font-weight:500}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:none;color:var(--tx);border-radius:8px;padding:4px 11px;font-size:13px}
+.chip.on{background:rgba(143,179,222,.18);border-color:var(--pri);color:var(--pri)}
+.tierhead{padding:2px 14px 0;font-size:13px;font-weight:500}
+main{max-width:760px;margin:0 auto;padding:8px 10px}
+.card{background:var(--card);border-radius:10px;margin:0 0 8px;display:flex;overflow:hidden}
+.strip{width:4px;flex:none}
+.body{padding:11px 12px;flex:1;min-width:0}
+.meta{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.badge{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.src{font-weight:700}
+.ago{color:var(--mut);font-size:12px;margin-inline-start:auto}
+.title{font-size:16px;font-weight:500;margin:6px 0 2px;cursor:pointer}
+.title[dir=ltr]{text-align:right}
+.mt{font-size:11.5px;color:var(--sec)}
+.orig{font-size:13px;color:var(--mut);display:none}
+.card.x .orig{display:block}
+.sum{font-size:13.5px;color:var(--mut);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.x .sum{-webkit-line-clamp:unset}
+.tags{font-size:12px;color:var(--pri);margin-top:4px}
+.acts{display:flex;align-items:center;gap:2px;margin-top:6px;flex-wrap:wrap}
+.btn{background:none;border:0;color:var(--pri);padding:6px 10px;border-radius:8px;font-size:13.5px;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.btn:hover,.btn:focus-visible{background:var(--card2);outline:none}
+.btn svg{width:16px;height:16px}
+.menu{position:relative}
+.menu .dd{display:none;position:absolute;bottom:110%;inset-inline-start:0;background:var(--card2);border:1px solid var(--line);border-radius:10px;min-width:230px;z-index:30;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.menu.open .dd{display:block}
+.dd a{display:block;padding:8px 12px;border-radius:7px;text-decoration:none;font-size:13.5px}
+.dd a:hover{background:var(--card)}
+.conf{height:4px;border-radius:2px;background:rgba(58,63,69,.6);margin:9px 0 2px;overflow:hidden}
+.conf i{display:block;height:100%}
+.lead{font-size:12px}
+.evlist{display:none;border-top:1px solid var(--line);margin-top:8px;padding-top:4px}
+.card.x .evlist{display:block}
+.evi{display:flex;gap:8px;padding:6px 0;text-decoration:none}
+.evi b{font-size:12.5px;font-weight:500}
+.evi div{font-size:13.5px}
+.empty{text-align:center;color:var(--mut);padding:50px 20px}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--bar);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:8px 0 6px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button svg{width:22px;height:22px}
+nav button.act{color:var(--pri)}
+.page{max-width:760px;margin:0 auto;padding:14px}
+.page h2{margin:4px 0 2px;font-size:21px}
+.page h3{color:var(--sec);font-size:15px;margin:22px 0 6px}
+.hint{color:var(--mut);font-size:13px}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(58,63,69,.5)}
+.row .t{flex:1;min-width:0}
+.row .s{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s.err{color:var(--err)}
+.sw{position:relative;width:42px;height:24px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:var(--line);border-radius:12px;transition:.2s}
+.sw span:before{content:"";position:absolute;width:18px;height:18px;right:3px;top:3px;background:var(--mut);border-radius:50%;transition:.2s}
+.sw input:checked+span{background:rgba(143,179,222,.45)}
+.sw input:checked+span:before{transform:translateX(-18px);background:var(--pri)}
+.sw input:focus-visible+span{outline:2px solid var(--pri)}
+input.tx,select.tx{width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font:inherit}
+.pbtn{background:var(--pri);color:#0E1A26;border:0;border-radius:10px;padding:9px 16px;font-weight:500}
+.obtn{background:none;color:var(--pri);border:1px solid var(--line);border-radius:10px;padding:9px 16px}
+.obtn.danger{color:var(--err)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.stat{background:var(--card);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:12px;color:var(--mut)}
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:9px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:40}
+#toast.on{opacity:1}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <div class="top">
+    <div><h1>رصد الأخبار</h1><div class="sub" id="sub">جارٍ التحميل…</div></div>
+    <div class="grow"></div>
+    <button class="ib" id="bSearch" title="بحث" aria-label="بحث"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 9.5 16a6.5 6.5 0 0 0 4.2-1.6l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg></button>
+    <button class="ib on" id="bTr" title="عرض الترجمة" aria-label="عرض الترجمة"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12.9 15.1-2.5-2.5v-.1a17 17 0 0 0 3.6-6.4H17V4h-7V2H8v2H1v2h11.2c-.7 2-1.7 3.8-3.2 5.4-1-1.1-1.8-2.3-2.4-3.5h-2c.7 1.6 1.7 3.2 3 4.6l-5.1 5 1.4 1.5L9 14l3.1 3.1.8-2zm5.6-5.1h-2L12 22h2l1.1-3h4.8l1.1 3h2l-4.5-12zm-2.6 7 1.6-4.3 1.6 4.3h-3.2z"/></svg></button>
+    <button class="ib" id="bRef" title="تحديث" aria-label="تحديث"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.7 6.3A8 8 0 1 0 19.7 14h-2.1A6 6 0 1 1 12 6c1.7 0 3.1.7 4.2 1.8L13 11h7V4l-2.3 2.3z"/></svg></button>
+  </div>
+  <input id="search" type="search" placeholder="ابحث في العناوين والمصادر">
+  <div class="tabs" id="tabs"></div>
+  <div class="prog" id="prog"></div>
+</header>
+<div id="newsBar"><div class="chips" id="chips"></div><div class="tierhead" id="tierhead"></div></div>
+<main id="list"></main>
+<section class="page hidden" id="pgSources"></section>
+<section class="page hidden" id="pgSettings"></section>
+<nav>
+  <button data-nav="news" class="act"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h14v4h2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm2 2v12h10V6H6zm2 2h6v2H8V8zm0 4h6v2H8v-2z"/></svg>الأخبار</button>
+  <button data-nav="sources"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 1 5.8V11h4.2a3 3 0 1 1 0 2H13v3.2a3 3 0 1 1-2 0V13H6.8a3 3 0 1 1 0-2H11V7.8A3 3 0 0 1 12 2z"/></svg>المصادر</button>
+  <button data-nav="settings"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7 7 0 0 0-1.7-1L15 3h-4l-.4 2.9a7 7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>الإعدادات</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ls = { get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch{return d}},
+             set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}} };
+const S = { meta:null, items:[], events:[], page:ls.get("page",0), nav:"news", q:"", tags:new Set(),
+            confirmed:false, showAr:ls.get("showAr",true), open:new Set(), updated:-1 };
+const I = {
+  open:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7zM5 5h6V3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-6h-2v6H5V5z"/></svg>',
+  ver:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4zm-2 16-4-4 1.4-1.4 2.6 2.6 6.6-6.6L18 9l-8 8z"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 16a3 3 0 0 0-2 .8l-7.1-4.2a3 3 0 0 0 0-1.2L16 7.2A3 3 0 1 0 15 5l.1.6L8 9.8a3 3 0 1 0 0 4.4l7.1 4.2-.1.6a3 3 0 1 0 3-3z"/></svg>'
+};
+const tier = id => S.meta.tiers.find(t => t.id === id);
+function ago(t){const m=Math.floor((Date.now()/1000-t)/60);
+  return m<1?"الآن":m<60?`منذ ${m} د`:m<1440?`منذ ${Math.floor(m/60)} س`:`منذ ${Math.floor(m/1440)} ي`;}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2600);}
+const badge = (t,sz=20) => `<span class="badge" style="width:${sz}px;height:${sz}px;background:${t.color}38;color:${t.color}">${t.id}</span>`;
+const hasAr = s => /[\u0600-\u06FF]/.test(s||"");
+const getJSON = async f => { const r = await fetch(`data/${f}?t=${Date.now()}`, {cache:"no-store"}); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); };
+const gh = p => S.meta && S.meta.repo ? `https://github.com/${S.meta.repo}${p}` : "#";
+const VERIFY = [
+  ["Google Fact Check Explorer", t=>"https://toolbox.google.com/factcheck/explorer/search/"+encodeURIComponent(t)],
+  ["Reuters Fact Check", t=>g("site:reuters.com/fact-check "+t)],
+  ["AP Fact Check", t=>g("site:apnews.com/ap-fact-check "+t)],
+  ["AFP Fact Check", t=>g("site:factcheck.afp.com "+t)],
+  ["BBC Verify", t=>g('"BBC Verify" '+t)],
+  ["Bellingcat", t=>g("site:bellingcat.com "+t)],
+  ["InVID-WeVerify (الصور والفيديو)", _=>"https://www.invid-project.eu/tools-and-services/invid-verification-plugin/"],
+];
+function g(q){return "https://www.google.com/search?q="+encodeURIComponent(q)}
+const verifyMenu = title => { const t = title.split(/\s+/).slice(0,12).join(" ");
+  return `<div class="menu"><button class="btn" data-act="menu">${I.ver} تحقق</button><div class="dd">${
+    VERIFY.map(([n,f])=>`<a href="${esc(f(t))}" target="_blank" rel="noopener">${esc(n)}</a>`).join("")}</div></div>`; };
+
+function matches(it){
+  if(S.q){const q=S.q.toLowerCase();
+    if(!(it.title.toLowerCase().includes(q)||(it.title_ar||"").includes(q)||it.source_name.toLowerCase().includes(q))) return false;}
+  if(S.tags.size){const t=(it.tags||"").split("|"); for(const x of S.tags) if(!t.includes(x)) return false;}
+  return true;
+}
+const showTitle = it => S.showAr && it.title_ar ? it.title_ar : it.title;
+
+function newsCard(it){
+  const t=tier(it.tier), tr=S.showAr&&it.title_ar, sum=(S.showAr&&it.summary_ar)||it.summary||"";
+  return `<article class="card ${S.open.has("i"+it.id)?"x":""}" data-k="i${it.id}">
+   <div class="strip" style="background:${t.color}"></div><div class="body">
+   <div class="meta">${badge(t)}<span class="src" style="color:${t.color}">${esc(it.source_name)}</span><span class="ago">${ago(it.published)}</span></div>
+   <div class="title" data-act="x" ${hasAr(showTitle(it))?"":'dir="ltr"'}>${esc(showTitle(it))}</div>
+   ${tr?`<div class="mt">ترجمة آلية</div><div class="orig" dir="ltr">${esc(it.title)}</div>`:""}
+   ${sum?`<div class="sum" ${hasAr(sum)?"":'dir="ltr"'}>${esc(sum)}</div>`:""}
+   ${it.tags?`<div class="tags">${it.tags.split("|").map(x=>"#"+esc(x)).join("  ")}</div>`:""}
+   <div class="acts"><a class="btn" href="${esc(it.link)}" target="_blank" rel="noopener">${I.open} فتح</a>
+   ${verifyMenu(it.title)}<span class="grow"></span>
+   <button class="btn" data-act="share" data-id="${it.id}" aria-label="مشاركة">${I.share}</button></div></div></article>`;
+}
+
+function eventCard(e){
+  const lead=e.items.find(i=>i.id===e.lead_id)||e.items[0], lt=tier(lead.tier), n=e.tiers.length;
+  const col = n>=4?"var(--ok)":n>=2?"#E0B84A":"var(--line)";
+  const srcN = new Set(e.items.map(i=>i.source_id)).size;
+  return `<article class="card ${S.open.has("e"+e.key)?"x":""}" data-k="e${e.key}"><div class="body">
+   <div class="meta">${e.tiers.map(id=>badge(tier(id))).join("")}<span class="ago">${e.items.length} خبر من ${srcN} مصدر، ${ago(e.latest)}</span></div>
+   <div class="conf" title="${n} من 7 مستويات"><i style="width:${n/7*100}%;background:${col}"></i></div>
+   <div class="title" data-act="x" ${hasAr(showTitle(lead))?"":'dir="ltr"'}>${esc(showTitle(lead))}</div>
+   <div class="lead" style="color:${lt.color}">أعلى مستوى: ${esc(lead.source_name)} (${esc(lt.name)})</div>
+   <div class="evlist">${e.items.map(i=>{const t=tier(i.tier);return `<a class="evi" href="${esc(i.link)}" target="_blank" rel="noopener">${badge(t,18)}
+     <span><b style="color:${t.color}">${esc(i.source_name)}  ${ago(i.published)}</b><div ${hasAr(showTitle(i))?"":'dir="ltr"'}>${esc(showTitle(i))}</div></span></a>`}).join("")}
+     <div class="acts">${verifyMenu(lead.title)}<span class="grow"></span><button class="btn" data-act="share" data-id="${lead.id}">${I.share}</button></div></div>
+   </div></article>`;
+}
+
+function renderTabs(){
+  const pt=S.meta.per_tier||{};
+  $("#tabs").innerHTML = `<button class="tab ${S.page===0?"act":""}" data-page="0">⚡ الأحداث</button>` +
+    S.meta.tiers.map(t=>`<button class="tab ${S.page===t.id?"act":""}" style="--c:${t.color}" data-page="${t.id}">${t.emoji} ${t.short} (${pt[t.id]||0})</button>`).join("");
+  $("#chips").innerHTML = (S.page===0?`<button class="chip ${S.confirmed?"on":""}" data-conf>✔ مؤكَّد من ٣ مستويات فأكثر</button>`:"") +
+    (S.tags.size?`<button class="chip" data-clear>✕ مسح الفلاتر</button>`:"") +
+    S.meta.tags.map(x=>`<button class="chip ${S.tags.has(x)?"on":""}" data-tag="${esc(x)}">${esc(x)}</button>`).join("");
+  const t=S.page?tier(S.page):null;
+  $("#tierhead").innerHTML = t?`<span style="color:${t.color}">${t.emoji} المستوى ${t.id}: ${esc(t.name)}</span>`:"";
+}
+
+function renderList(){
+  let html;
+  if(S.page===0){
+    const list=S.events.filter(e=>(!S.confirmed||e.tiers.length>=3)&&e.items.some(matches));
+    html=list.slice(0,300).map(eventCard).join("");
+  } else {
+    html=S.items.filter(i=>i.tier===S.page&&matches(i)).slice(0,400).map(newsCard).join("");
+  }
+  $("#list").innerHTML = html || `<div class="empty">${"لا أخبار تطابق الفلاتر الحالية. امسح الفلاتر أو اضغط تحديث."}</div>`;
+}
+
+
+
+function renderHeader(){
+  const m=S.meta, multi=S.events.filter(e=>e.tiers.length>=2).length;
+  $("#sub").textContent = `${m.count} خبر، ${multi} حدث من أكثر من مستوى، آخر تحديث ${ago(m.updated)}`;
+  $("#bTr").classList.toggle("on", S.showAr);
+}
+
+async function load(force=false){
+  $("#prog").classList.add("on");
+  try{
+    const m = await getJSON("meta.json"); S.meta=m;
+    if(force || m.updated!==S.updated){
+      const [items, events] = await Promise.all([getJSON("items.json"), getJSON("events.json")]);
+      S.items=items; S.events=events;
+      if(S.updated>0 && m.updated!==S.updated) toast(m.new?`وصل ${m.new} خبر جديد`:"تم التحديث");
+      S.updated=m.updated;
+      if(S.nav==="news"){renderTabs(); renderList();}
+    }
+    renderHeader();
+  }catch(e){ $("#sub").textContent="لم تُنشر البيانات بعد. انتظر أول تشغيل للتحديث ثم أعد تحميل الصفحة."; }
+  $("#prog").classList.remove("on");
+}
+
+async function renderSources(){
+  const src = await getJSON("sources.json").catch(()=>[]);
+  let h = `<h2>المصادر</h2><p class="hint">يظهر تحت كل مصدر نتيجة آخر جلب. لتعطيل مصدر أضف معرّفه (بين قوسين) إلى <b>disabled_sources</b> في ملف الإعدادات.</p>
+   <a class="obtn" style="text-decoration:none;display:inline-block" href="${gh("/edit/main/config.json")}" target="_blank" rel="noopener">تعديل ملف الإعدادات على GitHub</a>`;
+  for(const t of S.meta.tiers){
+    h += `<h3 style="color:${t.color}">${t.emoji} المستوى ${t.id}: ${esc(t.name)}</h3>`;
+    for(const s of src.filter(x=>x.tier===t.id)){
+      const st=s.status; const msg = !s.enabled?"معطّل": !st?"لم يُجلب بعد": st.ok?`✓ ${st.n} عنصر، ${ago(st.at)}`:`✗ ${st.msg}، ${ago(st.at)}`;
+      h += `<div class="row"><div class="t"><div>${esc(s.name)} <span class="s" dir="ltr">(${s.id})</span></div>
+        <div class="s ${st&&!st.ok?"err":""}" title="${esc(s.url)}">${esc(msg)}</div></div></div>`;
+    }
+    if(t.id===7) h += `<div class="row"><div class="t"><div>InVID-WeVerify</div><div class="s">أداة لتحليل الصور والفيديو وليست خلاصة أخبار، وتُفتح من زر «تحقق» في كل خبر</div></div></div>`;
+  }
+  $("#pgSources").innerHTML = h;
+}
+
+function renderSettings(){
+  const m=S.meta, c=m.config||{};
+  const yn=v=>v?"مفعّل":"معطّل";
+  $("#pgSettings").innerHTML = `<h2>الإعدادات</h2>
+   <div class="stats" style="margin-top:10px">
+     <div class="stat"><b>${m.count}</b><span>خبر مخزن</span></div>
+     <div class="stat"><b>${ago(m.updated)}</b><span>آخر تحديث</span></div>
+     <div class="stat"><b>${m.sources_ok}/${m.sources_active}</b><span>مصادر نجح جلبها</span></div>
+     <div class="stat"><b style="color:${m.translator?"var(--ok)":"var(--err)"}">${m.translator?"تعمل":"متوقفة"}</b><span>الترجمة (${m.pending} بالانتظار)</span></div>
+   </div>
+   ${m.translator_error?`<p class="hint" style="color:var(--err)">${esc(m.translator_error)}</p>`:""}
+   <h3>التحديث</h3>
+   <p class="hint">يعمل التحديث تلقائياً كل ١٥ دقيقة عبر cron-job.org. لتشغيله الآن افتح صفحة Actions واضغط Run workflow.</p>
+   <a class="obtn" style="text-decoration:none;display:inline-block" href="${gh("/actions/workflows/update.yml")}" target="_blank" rel="noopener">فتح صفحة التحديث على GitHub</a>
+   <h3>الإعدادات الحالية</h3>
+   <div class="row"><div class="t">تنبيهات ntfy</div><div class="s">${m.ntfy?"الموضوع مضبوط":"NTFY_TOPIC غير مضبوط"}</div></div>
+   <div class="row"><div class="t">تنبيه الخبر العاجل</div><div class="s">${yn(c.notify_urgent)}</div></div>
+   <div class="row"><div class="t">تنبيه الأحداث المؤكدة (٣ مستويات فأكثر)</div><div class="s">${yn(c.notify_confirmed)}</div></div>
+   <div class="row"><div class="t">كلمات التنبيه العاجل</div><div class="s">${esc(c.keywords||"كل أخبار المستوى الأول")}</div></div>
+   <div class="row"><div class="t">مدة الاحتفاظ</div><div class="s">${c.retention_days} يوم</div></div>
+   <p style="margin-top:12px"><a class="pbtn" style="text-decoration:none;display:inline-block" href="${gh("/edit/main/config.json")}" target="_blank" rel="noopener">تعديل الإعدادات على GitHub</a></p>
+   <p class="hint">تسري التعديلات من التحديث التالي.</p>
+   <h3>حول</h3>
+   <p class="hint">رصد الأخبار: سبعة مستويات من المصادر، من الخبر العاجل إلى التحقق. الترجمة والتجميع يتمان على GitHub Actions، فيُجمع الخبر العربي والإنجليزي في حدث واحد. لتثبيت الصفحة كتطبيق: قائمة المتصفح ثم «إضافة إلى الشاشة الرئيسية».</p>`;
+}
+
+function go(nav){
+  S.nav=nav;
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("act",b.dataset.nav===nav));
+  const news = nav==="news";
+  $("#hdr").classList.toggle("hidden",!news); $("#newsBar").classList.toggle("hidden",!news); $("#list").classList.toggle("hidden",!news);
+  $("#pgSources").classList.toggle("hidden",nav!=="sources"); $("#pgSettings").classList.toggle("hidden",nav!=="settings");
+  if(!S.meta) return;
+  if(news){renderTabs();renderList();} else if(nav==="sources") renderSources(); else renderSettings();
+  scrollTo(0,0);
+}
+
+document.addEventListener("click", ev=>{
+  const el=ev.target.closest("[data-page],[data-tag],[data-conf],[data-clear],[data-act],[data-nav]");
+  document.querySelectorAll(".menu.open").forEach(m=>{ if(!m.contains(ev.target)) m.classList.remove("open"); });
+  if(!el) return;
+  if(el.dataset.nav) return go(el.dataset.nav);
+  if(el.dataset.page!==undefined){S.page=+el.dataset.page;ls.set("page",S.page);renderTabs();renderList();return scrollTo(0,0);}
+  if(el.dataset.tag){const t=el.dataset.tag;S.tags.has(t)?S.tags.delete(t):S.tags.add(t);renderTabs();return renderList();}
+  if(el.hasAttribute("data-conf")){S.confirmed=!S.confirmed;renderTabs();return renderList();}
+  if(el.hasAttribute("data-clear")){S.tags.clear();renderTabs();return renderList();}
+  const act=el.dataset.act;
+  if(act==="x"){const c=el.closest(".card"),k=c.dataset.k;c.classList.toggle("x");S.open.has(k)?S.open.delete(k):S.open.add(k);}
+  if(act==="menu"){ev.preventDefault();el.parentElement.classList.toggle("open");}
+  if(act==="share"){const it=S.items.find(i=>i.id===+el.dataset.id)||S.events.flatMap(e=>e.items).find(i=>i.id===+el.dataset.id);
+    if(!it) return; const text=`${it.title_ar||it.title}\n— ${it.source_name}`;
+    if(navigator.share) navigator.share({title:it.source_name,text,url:it.link}).catch(()=>{});
+    else {navigator.clipboard?.writeText(`${text}\n${it.link}`); toast("نُسخ الخبر");}}
+});
+$("#bSearch").onclick=()=>{const s=$("#search");s.classList.toggle("show");if(s.classList.contains("show"))s.focus();else{s.value="";S.q="";renderList();}};
+$("#search").oninput=e=>{S.q=e.target.value.trim();renderList();};
+$("#bTr").onclick=()=>{S.showAr=!S.showAr;ls.set("showAr",S.showAr);renderHeader();renderList();};
+$("#bRef").onclick=()=>load(true);
+
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+load(true);
+setInterval(()=>{ if(!document.hidden) load(); }, 60000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>

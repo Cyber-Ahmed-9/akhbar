@@ -1,0 +1,3 @@
+{"name":"رصد الأخبار","short_name":"رصد","dir":"rtl","lang":"ar","start_url":"./","scope":"./","display":"standalone",
+ "background_color":"#15181B","theme_color":"#15181B",
+ "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
