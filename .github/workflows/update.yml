@@ -1,0 +1,62 @@
+name: Update news
+
+on:
+  workflow_dispatch:          # started every 15 min by cron-job.org (reliable)
+  schedule:
+    - cron: "17 * * * *"      # hourly backup in case cron-job.org is down
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: akhbar-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+
+      - name: Restore translation models
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/argos-translate
+          key: argos-en-ar-v1
+
+      - name: Restore stored news
+        uses: actions/cache@v4
+        with:
+          path: state
+          key: state-${{ github.run_id }}
+          restore-keys: state-
+
+      - name: Install
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r worker/requirements.txt
+          python worker/install_models.py
+
+      - name: Fetch, translate, cluster, alert
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python worker/run.py
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
