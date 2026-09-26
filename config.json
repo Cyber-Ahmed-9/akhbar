@@ -1,0 +1,7 @@
+{
+  "keywords": "",
+  "notify_urgent": true,
+  "notify_confirmed": true,
+  "retention_days": 3,
+  "disabled_sources": []
+}
